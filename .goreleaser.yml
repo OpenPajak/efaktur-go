@@ -1,0 +1,27 @@
+builds:
+  - id: efakturtool_default
+    dir: .
+    main: ./cmd/efakturtool
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    ignore:
+      - goos: darwin
+        goarch: "386"
+      - goos: linux
+        goarch: "386"
+  - id: efakturtool_windows
+    dir: .
+    main: ./cmd/efakturtool
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    ignore:
+      - goos: windows
+        goarch: "386"
+
+release:
+  prerelease: auto

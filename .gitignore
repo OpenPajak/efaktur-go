@@ -1,0 +1,7 @@
+*.p12
+*.pem
+*.toml
+.vscode/
+
+# local artifacts
+./efakturtool
