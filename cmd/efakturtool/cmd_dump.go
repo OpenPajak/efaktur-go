@@ -126,6 +126,9 @@ var cmdDump = &cmdDumpT{
 				// temp pb to retrieve previous reported data.
 				task.RevisionNo = mp.RevisionNo + 1
 				task.OpCode = OpCode_Create
+			case KetSptSedangDiproses:
+				log.Printf("warning: SPT sedang diproses %+#v", mp)
+
 			default:
 				return fmt.Errorf("unhandled keterangan: %q", mState)
 			}
