@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/OpenPajak/efaktur-go/pkg/provider/web"
 	"github.com/ii64/go-binder/binder"
@@ -109,6 +110,27 @@ func Main(args []string) {
 			conf.CertificatePath,
 			err)
 	}
+
+	log.Printf("[CERT-LEAF] -----------------------------\n")
+	log.Printf("[CERT-LEAF] SN  : %s\n", tlsCert.Leaf.SerialNumber)
+	log.Printf("[CERT-LEAF] ISS : %q\n", tlsCert.Leaf.Issuer)
+	log.Printf("[CERT-LEAF] SUB : %q\n", tlsCert.Leaf.Subject)
+
+	expiryDur := tlsCert.Leaf.NotAfter.Sub(time.Now().UTC())
+	log.Printf("[CERT-LEAF] NOT BEFORE: %q", tlsCert.Leaf.NotBefore)
+	log.Printf("[CERT-LEAF] EXP IN %s [%.2f day(s)] (on %q)",
+		expiryDur,
+		expiryDur.Hours()/24,
+		tlsCert.Leaf.NotAfter)
+	log.Printf("[CERT-LEAF] -----------------------------\n")
+
+	if expiryDur < (time.Hour * 24 * 7 * 2) {
+		log.Printf("[WARNING] LEAF CERTIFICATE IS ABOUT TO EXPIRED IN %.2f DAY(s) !!!\n",
+			expiryDur.Hours()/24)
+	} else if expiryDur < 0 {
+		log.Fatalf("Leaf certificate is expired\n")
+	}
+
 	client, err := web.NewClient(web.ClientOptions{
 		TLSCertificate: tlsCert,
 	})
