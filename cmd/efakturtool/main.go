@@ -103,7 +103,7 @@ retryGobinderInit:
 }
 
 func Main(args []string) {
-	tlsCert, err := web.PKCS12ToTLSCertificateFromFile(conf.CertificatePath, conf.CertificatePassword)
+	tlsCert, clientCAs, err := web.PKCS12ToTLSCertificateFromFile(conf.CertificatePath, conf.CertificatePassword)
 	if err != nil {
 		log.Fatalf(
 			"failed to open PKCS#12 certificate from file: %q: %s\n",
@@ -133,6 +133,10 @@ func Main(args []string) {
 
 	client, err := web.NewClient(web.ClientOptions{
 		TLSCertificate: tlsCert,
+		TLSClientCAs:   clientCAs,
+
+		// Temporarily
+		TLSInsecureSkipVerify: true,
 	})
 	if err != nil {
 		log.Fatalf("failed to create client: %s\n", err)

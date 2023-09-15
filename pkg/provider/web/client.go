@@ -43,7 +43,7 @@ var (
 	}
 )
 
-func PKCS12ToTLSCertificateFromMemory(pfxData []byte, password string) (tlsCert *tls.Certificate, err error) {
+func PKCS12ToTLSCertificateFromMemory(pfxData []byte, password string) (tlsCert *tls.Certificate, clientCAs []*x509.Certificate, err error) {
 	var (
 		privateKey any
 		cert       *x509.Certificate
@@ -53,7 +53,7 @@ func PKCS12ToTLSCertificateFromMemory(pfxData []byte, password string) (tlsCert 
 		err = errors.Wrap(err, "decode chain")
 		return
 	}
-	_ = caCerts
+	clientCAs = caCerts
 
 	tlsCert = &tls.Certificate{
 		Certificate: [][]byte{cert.Raw},
@@ -63,7 +63,7 @@ func PKCS12ToTLSCertificateFromMemory(pfxData []byte, password string) (tlsCert 
 	return
 }
 
-func PKCS12ToTLSCertificateFromFile(path string, password string) (cert *tls.Certificate, err error) {
+func PKCS12ToTLSCertificateFromFile(path string, password string) (cert *tls.Certificate, clientCAs []*x509.Certificate, err error) {
 	var f *os.File
 	if f, err = os.Open(path); err != nil {
 		return
@@ -75,7 +75,7 @@ func PKCS12ToTLSCertificateFromFile(path string, password string) (cert *tls.Cer
 		return
 	}
 
-	cert, err = PKCS12ToTLSCertificateFromMemory(content, password)
+	cert, clientCAs, err = PKCS12ToTLSCertificateFromMemory(content, password)
 	return
 }
 
@@ -95,8 +95,10 @@ type Client struct {
 }
 
 type ClientOptions struct {
-	UserAgent      string
-	TLSCertificate *tls.Certificate
+	UserAgent             string
+	TLSCertificate        *tls.Certificate
+	TLSClientCAs          []*x509.Certificate
+	TLSInsecureSkipVerify bool
 
 	// Transport overrides http Transport TLS configuraton
 	// specified for given [`TLSCertificate`] in the option.
@@ -120,9 +122,17 @@ func NewClient(opts ClientOptions) (*Client, error) {
 	var transport = opts.Transport
 	// Transport option is not specified, configure transport TLS config.
 	if transport == nil {
+		certPool := x509.NewCertPool()
+		for _, clientCA := range opts.TLSClientCAs {
+			certPool.AddCert(clientCA)
+		}
 		trans := &http.Transport{
 			TLSClientConfig: &tls.Config{
 				Certificates: []tls.Certificate{},
+				ClientAuth:   tls.VerifyClientCertIfGiven,
+				ClientCAs:    certPool,
+
+				InsecureSkipVerify: opts.TLSInsecureSkipVerify,
 			},
 			// Doc: https://pkg.go.dev/net/http#pkg-overview
 			// > Programs that must disable HTTP/2 can do so by setting
