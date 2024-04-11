@@ -5,7 +5,6 @@ go 1.20
 require (
 	github.com/OpenPajak/efaktur-go v0.0.0-00010101000000-000000000000
 	github.com/bytedance/go-tagexpr/v2 v2.9.7
-	github.com/davecgh/go-spew v1.1.1
 	github.com/ii64/go-binder v1.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/olekukonko/tablewriter v0.0.5
@@ -25,8 +24,8 @@ require (
 	github.com/nyaruka/phonenumbers v1.0.55 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
-	golang.org/x/crypto v0.7.0 // indirect
-	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	software.sslmate.com/src/go-pkcs12 v0.2.0 // indirect
